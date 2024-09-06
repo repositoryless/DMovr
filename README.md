@@ -1,10 +1,11 @@
 # DMovr
 
-A simple .NET Core console application to move files between directories.
+A simple .NET Core console application to move files and directories between directories.
 
 ## Overview
 
-This program allows you to move files from one directory to another. It provides default paths or allows you to specify custom paths. If a custom path is not provided, it uses the default paths.
+This program allows you to move files from one directory to another. It provides default paths or allows you to specify custom paths. If a custom path is not provided, it uses the default paths.  
+
 This project is for me to learn C# and getting the hang of GitHub.
 
 ## Features
