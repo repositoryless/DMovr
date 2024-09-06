@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace TestingGround
+﻿namespace TestingGround
 {
     internal class Program
     {
@@ -8,58 +6,105 @@ namespace TestingGround
         {
             string defaultStartPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string customStartPath = "Custom start path is not set";
-            string defaultEndPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "movedItems");
+            string defaultEndPath = Path.Combine(defaultStartPath, "movedItems");
             string customEndPath = "Custom end path is not set";
             int switchPoints = 0;
+
             try
             {
-                Directory.CreateDirectory(defaultEndPath);
+                if (!Directory.Exists(defaultEndPath))
+                {
+                    Directory.CreateDirectory(defaultEndPath);
+                }
             }
             catch (Exception createDir)
             {
-                Console.WriteLine("Failed to create default directory, " + createDir);
+                Console.WriteLine("Failed to create default directory: " + createDir.Message);
+                return;
             }
 
             try
             {
                 Console.WriteLine("Enter the path you wish to move from (Press enter for default)");
-                Console.WriteLine("Default path is '" + defaultStartPath + "'");
+                Console.WriteLine($"Default path is '{defaultStartPath}'");
                 string? input = Console.ReadLine();
                 if (!string.IsNullOrEmpty(input))
                 {
-                    customStartPath = input;
-                    switchPoints = switchPoints + 1;
+                    customStartPath = Path.GetFullPath(input.Trim());
+                    if (!Directory.Exists(customStartPath))
+                    {
+                        Console.WriteLine("Source directory does not exist.");
+                        return;
+                    }
+                    switchPoints += 1;
                 }
 
                 Console.WriteLine("Enter the path you wish to move into (Press enter for default)");
-                Console.WriteLine("Default path is '" + defaultEndPath + "'");
+                Console.WriteLine($"Default path is '{defaultEndPath}'");
                 input = Console.ReadLine();
                 if (!string.IsNullOrEmpty(input))
                 {
-                    customEndPath = input;
-                    switchPoints = switchPoints + 2;
+                    customEndPath = Path.GetFullPath(input.Trim());
+                    if (!Directory.Exists(customEndPath))
+                    {
+                        Directory.CreateDirectory(customEndPath);
+                    }
+                    switchPoints += 2;
                 }
 
                 string sourcePath = switchPoints == 1 || switchPoints == 3 ? customStartPath : defaultStartPath;
                 string destinationPath = switchPoints == 2 || switchPoints == 3 ? customEndPath : defaultEndPath;
 
-                string[] files = Directory.GetFiles(sourcePath);
-
-                foreach (string file in files)
+                if (sourcePath.Equals(destinationPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    string fileName = Path.GetFileName(file);
-                    string destPath = Path.Combine(destinationPath, fileName);
-                    File.Move(file, destPath);
+                    Console.WriteLine("Source and destination paths cannot be the same.");
+                    return;
                 }
 
-                Console.WriteLine("Files moved successfully.");
-                Console.WriteLine("Process finished, press any key to exit...");
-                Console.ReadKey();
+                DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
+                FileInfo[] files = sourceDirectory.GetFiles();
+                DirectoryInfo[] directories = sourceDirectory.GetDirectories();
+
+                foreach (FileInfo file in files)
+                {
+                    string destFile = Path.Combine(destinationPath, file.Name);
+
+                    if (File.Exists(destFile))
+                    {
+                        Console.WriteLine($"File '{file.Name}' already exists at destination.");
+                        continue;
+                    }
+
+                    file.MoveTo(destFile);
+                }
+
+                foreach (DirectoryInfo dir in directories)
+                {
+                    string destDir = Path.Combine(destinationPath, dir.Name);
+
+                    if (dir.FullName.Equals(destinationPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (Directory.Exists(destDir))
+                    {
+                        Console.WriteLine($"Directory '{dir.Name}' already exists at destination.");
+                        continue;
+                    }
+
+                    dir.MoveTo(destDir);
+                }
+
+                Console.WriteLine("Files and directories moved successfully.");
             }
             catch (Exception moveFiles)
             {
-                Console.WriteLine("Failed to move files, " + moveFiles.Message);
+                Console.WriteLine("Failed to move files: " + moveFiles.Message);
             }
+
+            Console.WriteLine("Process finished, press any key to exit...");
+            Console.ReadKey();
         }
     }
 }
