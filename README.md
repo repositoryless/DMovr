@@ -16,6 +16,11 @@ This project is for me to learn C# and getting the hang of GitHub.
 -   **Custom Paths**: Enter your own source and destination paths if needed.
 -   **Error Handling**: Handles errors during directory creation and selection and file and directory moving.
 
+## Compatibility
+
+- Tested to work both on Windows 11/10.
+- Theoretically works on Linux and macOS.
+
 ## Notes
 -   The default destination directory will be created if it does not exist already.
 
